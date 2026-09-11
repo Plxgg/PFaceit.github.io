@@ -2,11 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0a0607">
 <title>Пользовательское соглашение — PLUGGS FACEIT</title>
 <meta name="description" content="Пользовательское соглашение и правила платформы PLUGGS FACEIT — независимой рейтинговой системы для Standarling, StandRise и Project Evolution.">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=Unbounded:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -39,6 +40,7 @@
   img,svg{ display:block; max-width:100%; }
   a{ color:inherit; text-decoration:none; }
   h1,h2,h3,p,ul{ margin:0; }
+  body, h1, h2, h3, p, li{ overflow-wrap:break-word; word-break:break-word; }
   ul{ list-style:none; padding:0; }
   button{ font:inherit; }
 
@@ -84,7 +86,7 @@
   }
 
   /* ---------- header ---------- */
-  .site-header{ position:sticky; top:0; z-index:50; background:rgba(9,5,6,.72); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .site-header{ position:sticky; top:0; z-index:50; background:rgba(9,5,6,.72); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding-top:var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)); }
   .header__row{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block:13px; }
   .brand{ display:flex; align-items:center; gap:.65rem; }
   .brand__mark{ flex:none; }
@@ -98,8 +100,8 @@
   .hero{ position:relative; padding-block:clamp(56px,10vw,104px) clamp(40px,7vw,72px); }
   .hero > .shell{ max-width:760px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:1.35rem; }
   .hero h1{
-    font-family:var(--font-display); font-weight:700; font-size:clamp(2.1rem,5.2vw,3.7rem);
-    line-height:1.08; letter-spacing:-.01em;
+    font-family:var(--font-display); font-weight:700; font-size:clamp(1.65rem,8vw,3.7rem);
+    line-height:1.12; letter-spacing:-.01em; hyphens:auto;
     background:linear-gradient(135deg,#fff 0%, var(--paper) 38%, var(--crimson) 115%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
@@ -192,7 +194,7 @@
   .callout p{ color:var(--mist); max-width:58ch; margin-inline:auto; line-height:1.75; }
 
   /* ---------- footer ---------- */
-  .site-footer{ border-top:1px solid var(--line); padding-block:38px; }
+  .site-footer{ border-top:1px solid var(--line); padding-block:38px calc(38px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); }
   .footer-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:18px; }
   .footer-brand{ display:flex; align-items:center; gap:.6rem; }
   .footer-note{ color:var(--mist); font-size:.85rem; max-width:560px; line-height:1.65; }
@@ -205,7 +207,10 @@
   .to-top:hover{ border-color:var(--crimson); color:var(--crimson); }
 
   .fab-top{
-    position:fixed; right:20px; bottom:20px; width:44px; height:44px; border-radius:50%;
+    position:fixed;
+    right:calc(20px + var(--tg-safe-area-inset-right, env(safe-area-inset-right, 0px)));
+    bottom:calc(20px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    width:44px; height:44px; border-radius:50%;
     border:1px solid var(--line); background:rgba(23,10,12,.85); backdrop-filter:blur(8px);
     color:var(--paper); display:flex; align-items:center; justify-content:center;
     opacity:0; pointer-events:none; transform:translateY(6px); z-index:60;
@@ -579,6 +584,42 @@
 
   <script>
   (function(){
+    // Telegram Mini App setup + client/OS detection
+    var tg = window.Telegram && window.Telegram.WebApp;
+    var root = document.documentElement;
+
+    function detectOS(){
+      var ua = navigator.userAgent || '';
+      var plat = (navigator.platform || '').toLowerCase();
+      if (/android/i.test(ua)) return 'android';
+      if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
+      if (/mac/i.test(plat) || /macintosh/i.test(ua)) return 'macos';
+      if (/win/i.test(plat) || /windows/i.test(ua)) return 'windows';
+      if (/linux/i.test(plat) || /linux/i.test(ua)) return 'linux';
+      return 'unknown';
+    }
+
+    var tgPlatform = (tg && tg.platform) || null; // ios | android | macos | tdesktop | web | weba
+    var os = detectOS();
+    // tdesktop covers both Windows and Linux Telegram Desktop, so fall back to UA sniffing to tell them apart
+    var resolved =
+      tgPlatform === 'tdesktop' ? (os === 'linux' ? 'linux' : 'windows') :
+      (tgPlatform && tgPlatform !== 'web' && tgPlatform !== 'weba' && tgPlatform !== 'unknown') ? tgPlatform :
+      os;
+
+    root.setAttribute('data-tg-platform', tgPlatform || 'none');
+    root.setAttribute('data-os', resolved);
+    if (tg) root.classList.add('in-telegram');
+    root.classList.add('os-' + resolved);
+
+    if (tg){
+      try { tg.expand(); } catch(e){}
+      try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch(e){}
+      try { tg.setHeaderColor && tg.setHeaderColor('#0a0607'); } catch(e){}
+      try { tg.setBackgroundColor && tg.setBackgroundColor('#0a0607'); } catch(e){}
+      try { tg.ready(); } catch(e){}
+    }
+
     // background embers
     var field = document.querySelector('.bg__squares');
     var count = window.innerWidth < 640 ? 20 : 42;
